@@ -46,7 +46,7 @@ public class CoolWeatherDB {
 
     public List<Province> loadProvince() {
         List<Province> list = new ArrayList<Province>();
-        Cursor cursor = db.query("Province", null, null, null, null, null, null);
+        Cursor cursor = db.query("lProvince", null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
             do {
                 Province province = new Province();
