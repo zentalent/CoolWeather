@@ -2,7 +2,10 @@ package com.android.extremez.coolweather.activity;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -46,11 +49,19 @@ public class ChooseAreaActivity extends Activity {
 
     private Province selectedProvince;
     private City selectedCity;
+    private County selectedCounty;
    private int currentLevel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if(prefs.getBoolean("city_selected",false)){
+            Intent intent = new Intent(this,WeatherActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.choose_area);
         listView = (ListView)findViewById(R.id.list_view);
@@ -63,10 +74,15 @@ public class ChooseAreaActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(currentLevel == LEVEL_PROVINCE){
                     selectedProvince = provinceList.get(position);
-//                    queryCities();
+                    queryCities();
                 }else if(currentLevel == LEVEL_CITY){
                     selectedCity = cityList.get(position);
-//                    queryCounties();
+                    queryCounties();
+                }else if (currentLevel == LEVEL_COUNTY){
+                    String countyCode = countyList.get(position).getCountyCode();
+                    Intent intent = new Intent(ChooseAreaActivity.this,WeatherActivity.class);
+                    intent.putExtra("county_code",countyCode);
+                    startActivity(intent);
                 }
             }
         });
@@ -76,6 +92,7 @@ public class ChooseAreaActivity extends Activity {
 
     private void queryProvinces(){
         provinceList = coolWeatherDB.loadProvince();
+
         if(provinceList.size()>0)
         {
             dataList.clear();
@@ -93,6 +110,7 @@ public class ChooseAreaActivity extends Activity {
 
     private void queryCities() {
         cityList = coolWeatherDB.loadCities(selectedProvince.getId());
+        Log.d("qcity","city size is "+ cityList.size());
         if (cityList.size() > 0) {
             dataList.clear();
             for (City city : cityList) {
@@ -103,6 +121,7 @@ public class ChooseAreaActivity extends Activity {
             titleText.setText(selectedProvince.getProvinceName());
             currentLevel = LEVEL_CITY;
         } else {
+            Log.d("XML","准备Q city了");
             queryFromServer(selectedProvince.getProvinceCode(), "city");
         }
     }
@@ -122,6 +141,7 @@ public class ChooseAreaActivity extends Activity {
             queryFromServer(selectedCity.getCityCode(), "county");
         }
     }
+
     private void queryFromServer(final String code, final String type) {
         String address;
         if (!TextUtils.isEmpty(code)) {
@@ -137,9 +157,11 @@ public class ChooseAreaActivity extends Activity {
             public void onFinish(String response) {
                 boolean result = false;
                 if ("province".equals(type)) {
+                    Log.d("XMl", "handle Province");
                     result = Utility.handleProvinceResponsByXML(coolWeatherDB,
                             response);
                 } else if ("city".equals(type)) {
+                    Log.d("XMl", "handle city");
                     result = Utility.handleCitiesResponseByXML(coolWeatherDB,
                             response, selectedProvince.getId());
                 } else if ("county".equals(type)) {
@@ -171,6 +193,7 @@ public class ChooseAreaActivity extends Activity {
             }
             @Override
             public void onError(Exception e) {
+
 // 通过runOnUiThread()方法回到主线程处理逻辑
                 runOnUiThread(new Runnable() {
                     @Override

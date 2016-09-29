@@ -17,6 +17,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.WeatherActivity">
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.ACTION_START"/>-->
+                <!--<category android:name="android.intent.category.DEFAULT"/>-->
+            <!--</intent-filter>-->
+
+        </activity>
     </application>
 
 </manifest>

@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.android.extremez.coolweather.db.CoolWeatherOpenHelper;
 
@@ -46,7 +47,7 @@ public class CoolWeatherDB {
 
     public List<Province> loadProvince() {
         List<Province> list = new ArrayList<Province>();
-        Cursor cursor = db.query("lProvince", null, null, null, null, null, null);
+        Cursor cursor = db.query("Province", null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
             do {
                 Province province = new Province();
@@ -63,9 +64,13 @@ public class CoolWeatherDB {
         if (city != null) {
             ContentValues values = new ContentValues();
             values.put("city_name", city.getCityName());
+            Log.d("saveCity", "city.getCityName() = " + city.getCityName());
             values.put("city_code", city.getCityCode());
+            Log.d("saveCity", "city.getCityCode() = " + city.getCityCode());
             values.put("province_id", city.getProvinceId());
+            Log.d("saveCity", "city.getCityName() = " + city.getProvinceId());
             db.insert("City", null, values);
+            Log.d("saveCity","City was saved ");
         }
     }
 
@@ -76,8 +81,10 @@ public class CoolWeatherDB {
         List<City> list = new ArrayList<City>();
         Cursor cursor = db.query("City", null, "province_id = ?",
                 new String[]{String.valueOf(provinceId)}, null, null, null);
+        Log.d("loadcity","provinceid "+provinceId);
         if (cursor.moveToFirst()) {
             do {
+                Log.d("loadcity","准备将city放入list");
                 City city = new City();
                 city.setId(cursor.getInt(cursor.getColumnIndex("id")));
                 city.setCityName(cursor.getString(cursor
@@ -88,6 +95,7 @@ public class CoolWeatherDB {
                 list.add(city);
             } while (cursor.moveToNext());
         }
+        Log.d("loadcity","没有走到list");
             return list;
     }
 
